@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Qur'an Schedule</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --paper: #F5EFE1;
+    --paper-deep: #ECE1C6;
+    --ink: #123B36;
+    --gold: #B08D3F;
+    --gold-light: #D9BD7B;
+    --brick: #8C3B34;
+    --serif: 'Lora', Georgia, serif;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    min-height: 100vh;
+    font-family: var(--sans);
+    color: var(--ink);
+  }
+  .wrap { max-width: 448px; margin: 0 auto; padding: 32px 16px 64px; }
+  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  h1 { font-family: var(--serif); font-size: 24px; font-weight: 600; margin: 0; line-height: 1.2; }
+  .icon-btn {
+    border: 1px solid var(--ink); background: transparent; color: var(--ink);
+    border-radius: 999px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; margin-top: 2px;
+  }
+  .icon-btn:hover { opacity: 0.7; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn {
+    flex: 1 1 0; border: 1px solid var(--ink); background: transparent; color: var(--ink);
+    font-family: var(--sans); font-weight: 600; font-size: 12px; border-radius: 12px;
+    padding: 9px 4px; cursor: pointer; min-width: 0;
+  }
+  .tab-btn.active { background: var(--ink); color: var(--paper); }
+  .tab-btn:hover:not(.active) { background: var(--paper-deep); }
+
+  .panel { background: var(--paper-deep); border: 1px solid var(--gold-light); border-radius: 16px; padding: 16px; margin-bottom: 24px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
+  .field input, .field select {
+    width: 100%; background: #FBF8F0; border: 1px solid var(--gold-light); border-radius: 8px;
+    padding: 7px 8px; font-size: 13px; color: var(--ink); font-family: var(--sans);
+  }
+  .btn-primary {
+    width: 100%; background: var(--ink); color: var(--paper); font-family: var(--sans); font-weight: 600;
+    font-size: 14px; border: none; border-radius: 12px; padding: 10px; cursor: pointer; margin-top: 12px;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .progress-card { background: var(--ink); border-radius: 16px; padding: 20px; margin-bottom: 24px; position: relative; overflow: hidden; }
+  .progress-fill { position: absolute; left: 0; top: 0; height: 4px; background: var(--gold); transition: width 0.4s; }
+  .progress-top { display: flex; align-items: baseline; justify-content: space-between; }
+  .progress-label { color: var(--gold-light); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 4px; }
+  .progress-count { color: var(--paper); font-family: var(--serif); font-size: 28px; font-weight: 600; margin: 0; }
+  .progress-count span { color: var(--gold-light); font-size: 16px; }
+  .progress-pct { color: var(--paper); font-family: var(--serif); font-size: 22px; font-weight: 600; margin: 0; }
+  .progress-sub { color: var(--gold-light); font-size: 11px; margin: 8px 0 0; }
+  .section-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px; }
+  .ribbon { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px; }
+  .day-tab {
+    flex-shrink: 0; min-width: 58px; padding: 8px 8px 16px; text-align: center; cursor: pointer;
+    clip-path: polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%);
+    border: 1px solid var(--gold-light); background: var(--paper-deep);
+  }
+  .day-tab .num { font-family: var(--serif); font-size: 14px; font-weight: 700; margin: 0; }
+  .day-tab .wd { font-family: var(--sans); font-size: 10px; margin: 2px 0 0; opacity: 0.8; }
+  .day-tab.done { background: var(--gold); }
+  .day-tab.active { background: var(--ink); }
+  .day-tab.active .num { color: var(--paper); }
+  .day-tab.active .wd { color: var(--gold-light); }
+  .day-tab.today { border-color: var(--brick); }
+  .day-tab.past { opacity: 0.45; }
+  .day-tab.inactive-day { opacity: 0.35; }
+  .detail-card { background: var(--paper-deep); border: 1px solid var(--gold-light); border-radius: 16px; padding: 16px; margin-bottom: 24px; }
+  .detail-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .detail-title { font-family: var(--serif); font-weight: 600; margin: 0; }
+  .detail-sub { color: var(--brick); font-size: 12px; margin: 2px 0 0; }
+  .btn-mark {
+    background: var(--ink); color: var(--paper); font-family: var(--sans); font-weight: 600; font-size: 12px;
+    border: none; border-radius: 8px; padding: 7px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+  }
+  .btn-mark:hover { opacity: 0.9; }
+  .btn-mark.completed-today { background: #C9C2AC; color: #6b6455; }
+  .btn-mark.completed-today:hover { opacity: 1; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    width: 40px; height: 32px; border-radius: 6px; border: 1px solid var(--ink); background: transparent;
+    color: var(--ink); font-size: 11px; font-weight: 500; font-family: var(--sans); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; opacity: 0.75;
+  }
+  .chip.read { background: var(--gold); border-color: var(--gold); opacity: 1; }
+  .chip:hover { opacity: 1; }
+  .btn-outline {
+    width: 100%; border: 1px solid var(--ink); color: var(--ink); background: transparent; font-family: var(--sans);
+    font-weight: 600; font-size: 12px; border-radius: 12px; padding: 9px; cursor: pointer; margin-bottom: 24px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-outline:hover { opacity: 0.7; }
+  .bulk-row { display: flex; gap: 8px; align-items: flex-end; }
+  .btn-bulk {
+    background: var(--gold); color: var(--ink); font-family: var(--sans); font-weight: 600; font-size: 12px;
+    border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; height: 36px;
+  }
+  .grid-toggle {
+    width: 100%; background: none; border: none; display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink);
+    cursor: pointer; margin-bottom: 12px; padding: 0; font-family: var(--sans);
+  }
+  .grid-panel { max-height: 320px; overflow-y: auto; }
+  .complete-card { background: var(--paper-deep); border: 1px solid var(--gold); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 24px; }
+  .complete-card p { font-family: var(--serif); font-size: 18px; font-weight: 600; margin: 12px 0 0; }
+  svg { display: block; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .link-btn { background: none; border: none; color: var(--brick); font-family: var(--sans); font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; }
+  .link-btn:hover { opacity: 0.7; }
+  .weekday-row { display: flex; gap: 6px; margin-bottom: 4px; }
+  .wd-btn {
+    flex: 1; padding: 7px 0; border: 1px solid var(--ink); background: transparent; border-radius: 8px;
+    font-size: 11px; font-family: var(--sans); font-weight: 600; cursor: pointer; color: var(--ink);
+  }
+  .wd-btn.active { background: var(--ink); color: var(--paper); }
+  .btn-danger {
+    width: 100%; border: 1px solid var(--brick); color: var(--brick); background: transparent; font-family: var(--sans);
+    font-weight: 600; font-size: 12px; border-radius: 12px; padding: 9px; cursor: pointer; margin-top: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-danger:hover { background: var(--brick); color: var(--paper); }
+  .chip-auto { width: auto; padding: 0 10px; }
+  .freq-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .freq-row .wd-btn { flex: 1 1 30%; }
+  .pace-card { background: var(--ink); border-radius: 16px; padding: 20px; margin: 14px 0; text-align: center; }
+  .pace-num { color: var(--paper); font-family: var(--serif); font-size: 36px; font-weight: 700; margin: 0; }
+  .pace-unit { color: var(--gold-light); font-family: var(--sans); font-size: 12px; margin: 2px 0 0; text-transform: uppercase; letter-spacing: 0.08em; }
+  .pace-sub { color: var(--gold-light); font-size: 11px; margin: 8px 0 0; opacity: 0.9; }
+  .juz-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
+  .juz-cell {
+    aspect-ratio: 1; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer; border: 2px solid transparent;
+  }
+  .juz-cell.editing { border-color: var(--ink); }
+  .juz-cell .jn { font-family: var(--serif); font-weight: 700; font-size: 15px; margin: 0; }
+  .juz-cell .jm { font-family: var(--sans); font-size: 10px; margin: 2px 0 0; }
+  .legend-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .legend-chip { border-radius: 8px; padding: 5px 9px; font-size: 10px; font-family: var(--sans); font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="wrap" id="root">Loading…</div>
+
+<script>
+const STORE_KEY = "quran-cycle-state-v4";
+const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const WEEKDAY_ABBR = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const TABS = [
+  { id: "goals", label: "Goals" },
+  { id: "today", label: "Today" },
+  { id: "progress", label: "Progress" },
+];
+
+// ---------- date helpers ----------
+function todayDate() {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+function effectiveToday() {
+  const now = new Date();
+  const shifted = new Date(now.getTime() - 60 * 60 * 1000);
+  return new Date(shifted.getFullYear(), shifted.getMonth(), shifted.getDate());
+}
+function toISO(d) {
+  const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,"0"), day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function fromISO(s) {
+  const [y,m,d] = s.split("-").map(Number);
+  return new Date(y, m-1, d);
+}
+function addDays(d, n) {
+  const r = new Date(d); r.setDate(r.getDate()+n); return r;
+}
+function diffDays(a, b) {
+  return Math.round((a.getTime() - b.getTime()) / 86400000);
+}
+function nextOnOrAfter(d, weekday) {
+  let r = new Date(d);
+  while (r.getDay() !== weekday) r = addDays(r, 1);
+  return r;
+}
+function fmtShort(d) {
+  return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+}
+function mondayOf(d) {
+  const day = d.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  return addDays(d, diff);
+}
+
+// ---------- core logic (cycle tracks: Reading / Hifdh) ----------
+function chunkPages(sortedPages, days) {
+  const len = sortedPages.length;
+  const base = Math.floor(len / days);
+  const extra = len % days;
+  const chunks = [];
+  let idx = 0;
+  for (let i = 0; i < days; i++) {
+    const size = base + (i < extra ? 1 : 0);
+    chunks.push(sortedPages.slice(idx, idx + size));
+    idx += size;
+  }
+  return chunks;
+}
+function trackedPages(t) {
+  const set = new Set();
+  for (let p = t.rangeStart; p <= t.rangeEnd; p++) set.add(p);
+  (t.extraPages || []).forEach(p => set.add(p));
+  return Array.from(set).sort((a,b) => a-b);
+}
+function unreadPages(t) {
+  const readSet = new Set(t.readPages);
+  return trackedPages(t).filter(p => !readSet.has(p));
+}
+function defaultTrack(rangeStart, rangeEnd, startWeekday, cycleDays) {
+  const sw = typeof startWeekday === "number" ? startWeekday : 1;
+  const cd = cycleDays || 10;
+  return {
+    rangeStart, rangeEnd, cycleDays: cd, startWeekday: sw,
+    readPages: [],
+    extraPages: [],
+    pendingPages: [],
+    cycleStartDate: toISO(nextOnOrAfter(todayDate(), sw)),
+    selectedDay: 0,
+    selectedDayDate: null,
+    schedule: null,
+    scheduleBuiltDate: null,
+  };
+}
+function defaultPoqTrack() {
+  const todayISO = toISO(effectiveToday());
+  return {
+    rangeStart: 1,
+    rangeEnd: 604,
+    listenDays: [0,1,2,3,4,5,6],
+    readDays: [0,1,2,3,4,5,6],
+    readHalf: "first",
+    entries: {},
+    selectedDate: todayISO,
+    selectedDateSetOn: todayISO,
+  };
+}
+function commitPending(t) {
+  if (!t.pendingPages || t.pendingPages.length === 0) return t;
+  const extra = new Set(t.extraPages || []);
+  t.pendingPages.forEach(p => extra.add(p));
+  return { ...t, extraPages: Array.from(extra), pendingPages: [] };
+}
+function maybeAdvanceCycle(t) {
+  const cycleEnd = addDays(fromISO(t.cycleStartDate), t.cycleDays);
+  if (effectiveToday() >= cycleEnd) {
+    const base = cycleEnd < effectiveToday() ? effectiveToday() : cycleEnd;
+    const advanced = { ...t, cycleStartDate: toISO(nextOnOrAfter(base, t.startWeekday)), schedule: null, scheduleBuiltDate: null };
+    return commitPending(advanced);
+  }
+  return t;
+}
+function buildSchedule(t) {
+  const daysElapsed = Math.min(t.cycleDays, Math.max(0, diffDays(effectiveToday(), fromISO(t.cycleStartDate))));
+  const remainingDays = t.cycleDays - daysElapsed;
+  const unread = unreadPages(t).slice().sort((a,b) => a-b);
+  const chunks = new Array(t.cycleDays).fill(null).map(() => []);
+  if (remainingDays > 0) {
+    const distributed = chunkPages(unread, remainingDays);
+    for (let i = 0; i < remainingDays; i++) chunks[daysElapsed + i] = distributed[i];
+  }
+  return chunks;
+}
+function ensureSchedule(t) {
+  const todayISO = toISO(effectiveToday());
+  if (!t.schedule || t.scheduleBuiltDate !== todayISO) {
+    return { ...t, schedule: buildSchedule(t), scheduleBuiltDate: todayISO };
+  }
+  return t;
+}
+function currentDaysElapsed(t) {
+  return Math.min(t.cycleDays, Math.max(0, diffDays(effectiveToday(), fromISO(t.cycleStartDate))));
+}
+function refreshSelectedDay(t) {
+  const todayISO = toISO(effectiveToday());
+  if (t.selectedDayDate !== todayISO) {
+    const idx = Math.min(currentDaysElapsed(t), t.cycleDays - 1);
+    return { ...t, selectedDay: idx, selectedDayDate: todayISO };
+  }
+  return t;
+}
+function prepareTrack(t) {
+  return refreshSelectedDay(ensureSchedule(maybeAdvanceCycle(t)));
+}
+function refreshPoqSelection(t) {
+  const todayISO = toISO(effectiveToday());
+  if (t.selectedDateSetOn !== todayISO) {
+    return { ...t, selectedDate: todayISO, selectedDateSetOn: todayISO };
+  }
+  return t;
+}
+function poqEntry(t, dateISO) {
+  return (t.entries && t.entries[dateISO]) || { startPage: null, listened: [], read: [] };
+}
+function poqDayComplete(t, dateISO) {
+  const d = fromISO(dateISO);
+  const wd = d.getDay();
+  const listenOn = (t.listenDays || []).includes(wd);
+  const readOn = (t.readDays || []).includes(wd);
+  if (!listenOn && !readOn) return false;
+  const entry = poqEntry(t, dateISO);
+  if (entry.startPage == null) return false;
+  const listenSet = new Set(entry.listened || []);
+  const readSet = new Set(entry.read || []);
+  if (listenOn) {
+    for (let p = entry.startPage; p <= Math.min(entry.startPage + 11, t.rangeEnd); p++) if (!listenSet.has(p)) return false;
+  }
+  if (readOn) {
+    const lo = (t.readHalf || "first") === "second" ? entry.startPage + 6 : entry.startPage;
+    const hi = (t.readHalf || "first") === "second" ? entry.startPage + 11 : entry.startPage + 5;
+    for (let p = lo; p <= Math.min(hi, t.rangeEnd); p++) if (!readSet.has(p)) return false;
+  }
+  return true;
+}
+
+// ---------- Goals (simplified) ----------
+// Each goal: a total page amount per Weekly/Biweekly/Monthly period, which
+// weekdays it's actually practiced on, and a rolling "starting page" you
+// advance as you go. The daily amount is always auto-derived from these —
+// never entered separately — so changing the weekly number instantly
+// updates what "today" shows.
+const TIMELINE_LABELS = { weekly: "Weekly", biweekly: "Biweekly", monthly: "Monthly" };
+const TIMELINE_LIST = ["weekly", "biweekly", "monthly"];
+const TIMELINE_DAYS = { weekly: 7, biweekly: 14, monthly: 30 };
+const GOAL_CATEGORY_LABELS = {
+  hifdh: "Hifdh", review: "Review", poq: "POQ", cashr: "Cashr", readingReview: "Reading Review",
+};
+const GOAL_CATEGORY_KEYS = ["hifdh", "review", "poq", "cashr", "readingReview"];
+
+// Standard 604-page Madani Mushaf pagination: the page each Surah/Juz begins
+// on. Used only so picking a Juz or Surah can resolve to a starting page.
+// Editions can vary by a page or two — treat as a close reference.
+const SURAH_START_PAGE = [
+  1,2,50,77,106,128,151,177,187,208,
+  221,235,249,255,262,267,282,293,305,312,
+  322,332,342,350,359,367,377,385,396,404,
+  411,415,418,428,434,440,446,453,458,467,
+  477,483,489,496,499,502,507,511,515,518,
+  520,523,526,528,531,534,537,542,545,549,
+  551,553,554,556,558,560,562,564,566,568,
+  570,572,574,575,577,578,580,582,583,585,
+  586,587,587,589,590,591,591,592,593,594,
+  595,595,596,596,597,597,598,598,599,599,
+  600,600,601,601,601,602,602,602,603,603,
+  603,604,604,604,
+];
+const JUZ_START_PAGE = [
+  1,22,42,62,82,102,121,142,162,182,
+  201,222,242,262,282,302,322,342,362,382,
+  402,422,442,462,482,502,522,542,562,582,
+];
+function juzForPage(page) {
+  for (let i = 29; i >= 0; i--) if (page >= JUZ_START_PAGE[i]) return i + 1;
+  return 1;
+}
+function surahForPage(page) {
+  for (let i = 113; i >= 0; i--) if (page >= SURAH_START_PAGE[i]) return i + 1;
+  return 1;
+}
+
+function defaultSimpleGoal() {
+  return {
+    timeline: "weekly",
+    unit: "page", // 'page' | 'juz' | 'surah' — which picker is currently shown (each is independently multi-select)
+    pages: [],    // individually selected pages
+    juz: [],      // selected Juz numbers
+    surahs: [],   // selected Surah numbers
+    completedItems: [], // pages ticked off as done, from the combined pool below
+    completedDate: null, // ISO date the "mark complete" button was last used
+    amount: null, // pages per period
+    activeDays: [0,1,2,3,4,5,6], // weekdays this goal is practiced on (0=Sun..6=Sat)
+  };
+}
+function defaultGoals() {
+  const goals = {};
+  GOAL_CATEGORY_KEYS.forEach(k => { goals[k] = defaultSimpleGoal(); });
+  return goals;
+}
+function juzPageRange(j) {
+  const start = JUZ_START_PAGE[j - 1];
+  const end = j < 30 ? JUZ_START_PAGE[j] - 1 : 604;
+  return { start, end };
+}
+function surahPageRange(s) {
+  const start = SURAH_START_PAGE[s - 1];
+  const end = s < 114 ? SURAH_START_PAGE[s] - 1 : 604;
+  return { start, end };
+}
+// The full set of pages a goal covers — the union of any individually
+// selected pages, plus every page inside any selected Juz or Surah. You can
+// mix all three (e.g. 2 Juz + 3 Surahs + a few loose pages) freely.
+function goalPool(g) {
+  const set = new Set();
+  (g.pages || []).forEach(p => set.add(p));
+  (g.juz || []).forEach(j => { const r = juzPageRange(j); for (let p = r.start; p <= r.end; p++) set.add(p); });
+  (g.surahs || []).forEach(s => { const r = surahPageRange(s); for (let p = r.start; p <= r.end; p++) set.add(p); });
+  return Array.from(set).sort((a,b) => a-b);
+}
+// For these goals, once every selected page is completed, automatically
+// select the next batch of pages (continuing right after the last one)
+// instead of requiring a manual reselect.
+const AUTO_ADVANCE_AMOUNTS = { hifdh: 5, poq: 21, cashr: 10 };
+function autoAdvanceGoalIfComplete(catKey, g) {
+  const amount = AUTO_ADVANCE_AMOUNTS[catKey];
+  if (!amount) return g;
+  const pool = goalPool(g);
+  if (pool.length === 0) return g;
+  const completedSet = new Set(g.completedItems || []);
+  const stillPending = pool.some(p => !completedSet.has(p));
+  if (stillPending) return g;
+  const nextStart = Math.max(...pool) + 1;
+  if (nextStart > 604) return g; // reached the end of the mushaf
+  const nextPages = [];
+  for (let p = nextStart; p < nextStart + amount && p <= 604; p++) nextPages.push(p);
+  return { ...g, pages: nextPages, juz: [], surahs: [], unit: "page", completedItems: [] };
+}
+function goalSelectionSummary(g) {
+  const parts = [];
+  if ((g.juz || []).length) parts.push(`${g.juz.length} Juz`);
+  if ((g.surahs || []).length) parts.push(`${g.surahs.length} Surah${g.surahs.length===1?"":"s"}`);
+  if ((g.pages || []).length) parts.push(`${g.pages.length} page${g.pages.length===1?"":"s"}`);
+  if (!parts.length) return "Nothing selected yet";
+  return `${parts.join(", ")} · ${goalPool(g).length} pages total`;
+}
+// Best-effort carry-over from any earlier Goals save shape. Pacing settings
+// (timeline/amount/days) carry over; if the selection shape has changed,
+// selection starts fresh rather than risk misreading old fields.
+function migrateGoalsShape(goals) {
+  if (!goals) return defaultGoals();
+  const fresh = defaultGoals();
+  GOAL_CATEGORY_KEYS.forEach(k => {
+    const old = goals[k];
+    if (!old || !("timeline" in old)) return;
+    if ("pages" in old && "juz" in old && "surahs" in old && "completedItems" in old) {
+      fresh[k] = { ...defaultSimpleGoal(), ...old };
+    } else {
+      const activeDays = old.activeDays
+        || (old.daysPerWeek ? Array.from({length: Math.max(1, Math.min(7, old.daysPerWeek))}, (_, i) => i) : [0,1,2,3,4,5,6]);
+      fresh[k] = { ...defaultSimpleGoal(), timeline: old.timeline || "weekly", amount: old.amount ?? null, activeDays };
+    }
+  });
+  return fresh;
+}
+// The daily page amount, always derived live from timeline + amount + active days.
+function dailyPagesFor(g) {
+  const totalDays = TIMELINE_DAYS[g.timeline] || 7;
+  const weeks = totalDays / 7;
+  const activeDaysCount = Math.max(1, (g.activeDays || []).length) * weeks;
+  return activeDaysCount > 0 ? (g.amount || 0) / activeDaysCount : 0;
+}
+function formatPageRanges(pages) {
+  if (!pages.length) return "";
+  const sorted = pages.slice().sort((a,b) => a-b);
+  const ranges = [];
+  let start = sorted[0], prev = sorted[0];
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === prev + 1) { prev = sorted[i]; continue; }
+    ranges.push(start === prev ? `${start}` : `${start}–${prev}`);
+    start = sorted[i]; prev = sorted[i];
+  }
+  ranges.push(start === prev ? `${start}` : `${start}–${prev}`);
+  return ranges.join(", ");
+}
+// Today's exact pages: the next N pending pages from the selected pool
+// (N = today's derived daily amount), in order. Returns activeToday=false
+// if today isn't one of this goal's practice days.
+function goalTodayPages(g) {
+  const today = effectiveToday();
+  const activeToday = (g.activeDays || []).includes(today.getDay());
+  const daily = dailyPagesFor(g);
+  const pool = goalPool(g);
+  const completedSet = new Set(g.completedItems || []);
+  const pending = pool.filter(p => !completedSet.has(p));
+  if (!g.amount || daily <= 0 || !activeToday || pool.length === 0) {
+    return { pages: [], count: 0, activeToday, poolTotal: pool.length, poolRemaining: pending.length };
+  }
+  const count = Math.max(1, Math.round(daily));
+  return { pages: pending.slice(0, count), count, activeToday, poolTotal: pool.length, poolRemaining: pending.length };
+}
+
+// ---------- app state ----------
+let state = null;
+let ui = {
+  settingsOpen: false, gridOpen: false, pendingOpen: false,
+  goalPageGridOpen: {}, goalCardCollapsed: {}, confirmingGoal: null,
+  progressEditingJuz: null,
+};
+
+function getTrack() {
+  return state[state.activeTab];
+}
+
+function persist() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  } catch (e) { /* storage unavailable in this browser context; app still works this session */ }
+}
+
+function load() {
+  let loaded = null;
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) loaded = JSON.parse(raw);
+  } catch (e) { /* no existing value, or storage unavailable */ }
+
+  if (!loaded) {
+    loaded = defaultState();
+  } else if (!loaded.reading || !loaded.hifdh) {
+    const old = loaded;
+    loaded = {
+      activeTab: "goals",
+      reading: old.reading || {
+        rangeStart: old.rangeStart ?? 206,
+        rangeEnd: old.rangeEnd ?? 502,
+        cycleDays: old.cycleDays ?? 10,
+        startWeekday: old.startWeekday ?? 1,
+        readPages: old.readPages ?? [],
+        extraPages: old.extraPages ?? [],
+        pendingPages: old.pendingPages ?? [],
+        cycleStartDate: old.cycleStartDate ?? toISO(nextOnOrAfter(todayDate(), 1)),
+        selectedDay: old.selectedDay ?? 0,
+        selectedDayDate: old.selectedDayDate ?? null,
+        schedule: old.schedule ?? null,
+        scheduleBuiltDate: old.scheduleBuiltDate ?? null,
+      },
+      hifdh: old.hifdh || defaultTrack(1, 176),
+      poq: old.poq || defaultPoqTrack(),
+      goals: old.goals || defaultGoals(),
+      progress: old.progress || { juz: {} },
+    };
+  }
+  if (!loaded.poq) loaded.poq = defaultPoqTrack();
+  if (!loaded.goals) loaded.goals = defaultGoals();
+  if (!loaded.progress) loaded.progress = { juz: {} };
+  loaded.goals = migrateGoalsShape(loaded.goals);
+  Object.keys(AUTO_ADVANCE_AMOUNTS).forEach(k => {
+    if (loaded.goals[k]) loaded.goals[k] = autoAdvanceGoalIfComplete(k, loaded.goals[k]);
+  });
+
+  loaded.reading = prepareTrack(loaded.reading);
+  loaded.hifdh = prepareTrack(loaded.hifdh);
+  loaded.poq = refreshPoqSelection(loaded.poq);
+  if (!TABS.some(t => t.id === loaded.activeTab)) loaded.activeTab = "goals";
+  state = loaded;
+  render();
+  persist();
+}
+
+function defaultState() {
+  return {
+    activeTab: "goals",
+    reading: defaultTrack(206, 502),
+    hifdh: defaultTrack(1, 176),
+    poq: defaultPoqTrack(),
+    goals: defaultGoals(),
+    progress: { juz: {} },
+  };
+}
+
+function updateTrack(patch) {
+  const tab = state.activeTab;
+  let next = { ...state[tab], ...patch };
+  if (tab === "poq") {
+    // no cycle/schedule concept for the daily POQ log
+  } else {
+    if (patch.schedule === null) next = commitPending(next);
+    next = ensureSchedule(next);
+  }
+  state = { ...state, [tab]: next };
+  persist();
+  render();
+}
+function switchTab(tabId) {
+  ui.settingsOpen = false;
+  ui.gridOpen = false;
+  ui.pendingOpen = false;
+  ui.goalPageGridOpen = {};
+  ui.confirmingGoal = null;
+  if (tabId === "poq") {
+    state = { ...state, activeTab: tabId, poq: refreshPoqSelection(state.poq) };
+  } else if (tabId === "goals" || tabId === "progress" || tabId === "today") {
+    state = { ...state, activeTab: tabId };
+  } else {
+    state = { ...state, activeTab: tabId, [tabId]: prepareTrack(state[tabId]) };
+  }
+  persist();
+  render();
+}
+function selectDay(dayIdx) {
+  updateTrack({ selectedDay: dayIdx, selectedDayDate: toISO(effectiveToday()) });
+}
+function togglePage(page) {
+  const t = getTrack();
+  const readSet = new Set(t.readPages);
+  if (readSet.has(page)) readSet.delete(page); else readSet.add(page);
+  updateTrack({ readPages: Array.from(readSet) });
+}
+function markDayRead(pages) {
+  const t = getTrack();
+  const readSet = new Set(t.readPages);
+  pages.forEach(p => readSet.add(p));
+  updateTrack({ readPages: Array.from(readSet) });
+}
+function markRangeRead(a, b) {
+  const t = getTrack();
+  const lo = Math.min(a, b), hi = Math.max(a, b);
+  const trackedSet = new Set(trackedPages(t));
+  const readSet = new Set(t.readPages);
+  for (let p = lo; p <= hi; p++) if (trackedSet.has(p)) readSet.add(p);
+  updateTrack({ readPages: Array.from(readSet) });
+}
+function queuePendingPages(a, b) {
+  const t = getTrack();
+  const lo = Math.min(a, b), hi = Math.max(a, b);
+  const trackedSet = new Set(trackedPages(t));
+  const pending = new Set(t.pendingPages || []);
+  for (let p = lo; p <= hi; p++) if (!trackedSet.has(p)) pending.add(p);
+  updateTrack({ pendingPages: Array.from(pending) });
+}
+function removePending(page) {
+  const t = getTrack();
+  const pending = new Set(t.pendingPages || []);
+  pending.delete(page);
+  updateTrack({ pendingPages: Array.from(pending) });
+}
+function forceNewCycle() {
+  const t = getTrack();
+  const newStart = toISO(nextOnOrAfter(todayDate(), t.startWeekday));
+  updateTrack({ cycleStartDate: newStart, selectedDay: 0, selectedDayDate: toISO(effectiveToday()), schedule: null, scheduleBuiltDate: null });
+}
+function applySettings() {
+  const rangeStart = Math.max(1, parseInt(document.getElementById("rangeStartInput").value, 10) || 1);
+  const rangeEnd = Math.max(rangeStart, parseInt(document.getElementById("rangeEndInput").value, 10) || rangeStart);
+  const cycleDays = Math.max(1, parseInt(document.getElementById("cycleDaysInput").value, 10) || 1);
+  const startWeekday = parseInt(document.getElementById("startWeekdaySelect").value, 10);
+  const t = getTrack();
+  const readSet = new Set(t.readPages.filter(p => p >= rangeStart && p <= rangeEnd));
+  const newStart = toISO(nextOnOrAfter(todayDate(), startWeekday));
+  ui.settingsOpen = false;
+  updateTrack({
+    rangeStart, rangeEnd, cycleDays, startWeekday,
+    readPages: Array.from(readSet),
+    cycleStartDate: newStart, selectedDay: 0, selectedDayDate: toISO(effectiveToday()), schedule: null, scheduleBuiltDate: null,
+  });
+}
+function resetProgress() {
+  const t = getTrack();
+  const newStart = toISO(nextOnOrAfter(todayDate(), t.startWeekday));
+  updateTrack({ readPages: [], cycleStartDate: newStart, selectedDay: 0, selectedDayDate: toISO(effectiveToday()), schedule: null, scheduleBuiltDate: null });
+}
+
+// ---------- POQ actions ----------
+function selectPoqDate(dateISO) {
+  updateTrack({ selectedDate: dateISO, selectedDateSetOn: toISO(effectiveToday()) });
+}
+function setPoqStartPage(dateISO, page) {
+  const t = getTrack();
+  const clamped = Math.max(t.rangeStart, Math.min(t.rangeEnd, page));
+  const entries = { ...(t.entries || {}) };
+  const prev = entries[dateISO] || { startPage: null, listened: [], read: [] };
+  entries[dateISO] = { ...prev, startPage: clamped };
+  updateTrack({ entries });
+}
+function togglePoqPage(dateISO, page, kind) {
+  const t = getTrack();
+  const entries = { ...(t.entries || {}) };
+  const prev = entries[dateISO] || { startPage: null, listened: [], read: [] };
+  const set = new Set(prev[kind] || []);
+  if (set.has(page)) set.delete(page); else set.add(page);
+  entries[dateISO] = { ...prev, [kind]: Array.from(set) };
+  updateTrack({ entries });
+}
+function togglePoqWeekday(field, day) {
+  const t = getTrack();
+  const set = new Set(t[field] || []);
+  if (set.has(day)) set.delete(day); else set.add(day);
+  updateTrack({ [field]: Array.from(set) });
+}
+function setPoqReadHalf(half) {
+  updateTrack({ readHalf: half });
+}
+function resetPoq() {
+  updateTrack({ entries: {} });
+}
+function applyPoqRange() {
+  const rangeStart = Math.max(1, parseInt(document.getElementById("rangeStartInput").value, 10) || 1);
+  const rangeEnd = Math.max(rangeStart, parseInt(document.getElementById("rangeEndInput").value, 10) || rangeStart);
+  updateTrack({ rangeStart, rangeEnd });
+}
+
+// ---------- Goals actions ----------
+function updateGoal(catKey, patch) {
+  const g = { ...state.goals[catKey], ...patch };
+  state = { ...state, goals: { ...state.goals, [catKey]: g } };
+  persist();
+  render();
+}
+function setGoalTimeline(catKey, timeline) {
+  updateGoal(catKey, { timeline });
+}
+function setGoalUnit(catKey, unit) {
+  updateGoal(catKey, { unit });
+}
+function toggleGoalDay(catKey, day) {
+  const g = state.goals[catKey];
+  const set = new Set(g.activeDays || []);
+  if (set.has(day)) set.delete(day); else set.add(day);
+  updateGoal(catKey, { activeDays: Array.from(set) });
+}
+function toggleGoalPageSel(catKey, page) {
+  const g = state.goals[catKey];
+  const set = new Set(g.pages || []);
+  if (set.has(page)) set.delete(page); else set.add(page);
+  updateGoal(catKey, { pages: Array.from(set) });
+}
+function toggleGoalJuzSel(catKey, juzNum) {
+  const g = state.goals[catKey];
+  const set = new Set(g.juz || []);
+  if (set.has(juzNum)) set.delete(juzNum); else set.add(juzNum);
+  updateGoal(catKey, { juz: Array.from(set) });
+}
+function toggleGoalSurahSel(catKey, surahNum) {
+  const g = state.goals[catKey];
+  const set = new Set(g.surahs || []);
+  if (set.has(surahNum)) set.delete(surahNum); else set.add(surahNum);
+  updateGoal(catKey, { surahs: Array.from(set) });
+}
+function markGoalTodayDone(catKey) {
+  const g = state.goals[catKey];
+  const todayInfo = goalTodayPages(g);
+  if (!todayInfo.pages.length) return;
+  const set = new Set(g.completedItems || []);
+  todayInfo.pages.forEach(p => set.add(p));
+  const merged = { ...g, completedItems: Array.from(set) };
+  const advanced = autoAdvanceGoalIfComplete(catKey, merged);
+  updateGoal(catKey, {
+    pages: advanced.pages, juz: advanced.juz, surahs: advanced.surahs, unit: advanced.unit,
+    completedItems: advanced.completedItems, completedDate: toISO(effectiveToday()),
+  });
+}
+// Shared handler for both the Goals tab and Today tab "mark complete"
+// buttons. If already marked today, clicking again would silently advance
+// to the NEXT batch of pages — so this shows an in-app confirmation prompt
+// first (native confirm() dialogs get silently blocked in this preview),
+// as a safety net against an accidental double tap.
+function requestMarkComplete(catKey) {
+  const g = state.goals[catKey];
+  const todayISO = toISO(effectiveToday());
+  if (g.completedDate === todayISO) {
+    ui.confirmingGoal = catKey;
+    render();
+  } else {
+    markGoalTodayDone(catKey);
+  }
+}
+function confirmMarkComplete(catKey) {
+  ui.confirmingGoal = null;
+  markGoalTodayDone(catKey);
+}
+function cancelMarkComplete() {
+  ui.confirmingGoal = null;
+  render();
+}
+function clearGoalProgress(catKey) {
+  updateGoal(catKey, { completedItems: [] });
+}
+function resetGoal(catKey) {
+  updateGoal(catKey, defaultSimpleGoal());
+}
+
+// ---------- Progress (Juz mistake tracker) actions ----------
+function selectProgressJuz(juzNum) {
+  ui.progressEditingJuz = juzNum;
+  render();
+}
+function setJuzMistakes(juzNum, mistakes) {
+  const juzData = { ...(state.progress.juz || {}) };
+  juzData[juzNum] = mistakes;
+  state = { ...state, progress: { ...state.progress, juz: juzData } };
+  persist();
+  render();
+}
+function clearJuzMistakes(juzNum) {
+  const juzData = { ...(state.progress.juz || {}) };
+  delete juzData[juzNum];
+  state = { ...state, progress: { ...state.progress, juz: juzData } };
+  persist();
+  render();
+}
+function progressColor(mistakes) {
+  if (mistakes == null) return { bg: "#C9C2AC", text: "#123B36", label: "No input yet" };
+  if (mistakes <= 5) return { bg: "#4C7A54", text: "#F5EFE1", label: "Very good" };
+  if (mistakes <= 10) return { bg: "#C9A227", text: "#123B36", label: "Okay" };
+  if (mistakes <= 15) return { bg: "#C97A3D", text: "#F5EFE1", label: "Average" };
+  return { bg: "#8C3B34", text: "#F5EFE1", label: "Not good" };
+}
+
+// ---------- icons (inline svg) ----------
+const ICON = {
+  settings: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+  check: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  rotate: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>`,
+  chevDown: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
+  chevUp: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`,
+  book: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+};
+
+const SURAH_NAMES = [
+  "Al-Fatihah","Al-Baqarah","Aal-E-Imran","An-Nisa","Al-Ma'idah","Al-An'am","Al-A'raf","Al-Anfal","At-Tawbah","Yunus",
+  "Hud","Yusuf","Ar-Ra'd","Ibrahim","Al-Hijr","An-Nahl","Al-Isra","Al-Kahf","Maryam","Ta-Ha",
+  "Al-Anbiya","Al-Hajj","Al-Mu'minun","An-Nur","Al-Furqan","Ash-Shu'ara","An-Naml","Al-Qasas","Al-Ankabut","Ar-Rum",
+  "Luqman","As-Sajdah","Al-Ahzab","Saba","Fatir","Ya-Sin","As-Saffat","Sad","Az-Zumar","Ghafir",
+  "Fussilat","Ash-Shura","Az-Zukhruf","Ad-Dukhan","Al-Jathiyah","Al-Ahqaf","Muhammad","Al-Fath","Al-Hujurat","Qaf",
+  "Adh-Dhariyat","At-Tur","An-Najm","Al-Qamar","Ar-Rahman","Al-Waqi'ah","Al-Hadid","Al-Mujadilah","Al-Hashr","Al-Mumtahanah",
+  "As-Saff","Al-Jumu'ah","Al-Munafiqun","At-Taghabun","At-Talaq","At-Tahrim","Al-Mulk","Al-Qalam","Al-Haqqah","Al-Ma'arij",
+  "Nuh","Al-Jinn","Al-Muzzammil","Al-Muddaththir","Al-Qiyamah","Al-Insan","Al-Mursalat","An-Naba","An-Nazi'at","Abasa",
+  "At-Takwir","Al-Infitar","Al-Mutaffifin","Al-Inshiqaq","Al-Buruj","At-Tariq","Al-A'la","Al-Ghashiyah","Al-Fajr","Al-Balad",
+  "Ash-Shams","Al-Layl","Ad-Duha","Ash-Sharh","At-Tin","Al-Alaq","Al-Qadr","Al-Bayyinah","Az-Zalzalah","Al-Adiyat",
+  "Al-Qari'ah","At-Takathur","Al-Asr","Al-Humazah","Al-Fil","Quraysh","Al-Ma'un","Al-Kawthar","Al-Kafirun","An-Nasr",
+  "Al-Masad","Al-Ikhlas","Al-Falaq","An-Nas",
+];
+
+// ---------- render ----------
+function render() {
+  if (state.activeTab === "goals") renderGoals();
+  else if (state.activeTab === "today") renderToday();
+  else if (state.activeTab === "progress") renderProgress();
+  else if (state.activeTab === "poq") renderPoq();
+  else renderCycleTab();
+}
+
+function renderHeaderAndTabs() {
+  let html = `<div class="header">
+    <h1>Qur'an Schedule</h1>
+  </div>`;
+  html += `<div class="tabs">
+    ${TABS.map(tab => `<button class="tab-btn ${state.activeTab === tab.id ? "active" : ""}" data-tab="${tab.id}">${tab.label}</button>`).join("")}
+  </div>`;
+  return html;
+}
+
+// ---------- Goals rendering ----------
+function renderGoalCard(catKey, label) {
+  const g = state.goals[catKey];
+  const collapsed = !!ui.goalCardCollapsed[catKey];
+  const todayInfo = goalTodayPages(g);
+  const activeDays = g.activeDays || [];
+
+  let html = `<div class="panel">
+    <button data-goal-card-toggle="${catKey}" style="width:100%; background:none; border:none; cursor:pointer; padding:0; text-align:left; display:flex; align-items:flex-start; justify-content:space-between; gap:8px; font-family:inherit; color:inherit;">
+      <div>
+        <p class="detail-title" style="margin:0 0 2px;">${label}</p>
+        <p class="detail-sub" style="margin:0;">${g.amount ? `${g.amount} pages · ${TIMELINE_LABELS[g.timeline]} · ${activeDays.length}x/week` : "No target set"}</p>
+      </div>
+      <span style="flex-shrink:0; margin-top:3px;">${collapsed ? ICON.chevDown : ICON.chevUp}</span>
+    </button>`;
+
+  if (collapsed) {
+    html += `</div>`;
+    return html;
+  }
+
+  html += `<p class="section-label" style="margin-top:14px;">Timeline</p>
+    <div class="freq-row">
+      ${TIMELINE_LIST.map(t => `<button class="wd-btn ${t===g.timeline?"active":""}" data-goal-timeline="${catKey}:${t}">${TIMELINE_LABELS[t]}</button>`).join("")}
+    </div>
+
+    <div class="bulk-row" style="margin-top:10px;">
+      <div class="field" style="flex:1;">
+        <label>Amount per ${TIMELINE_LABELS[g.timeline].toLowerCase()} (pages)</label>
+        <input type="number" min="0" step="0.5" id="goalAmount_${catKey}" value="${g.amount ?? ""}" placeholder="e.g. 20">
+      </div>
+      <button class="btn-bulk" data-goal-save-amount="${catKey}">Save</button>
+    </div>
+
+    <p class="section-label" style="margin-top:14px;">Days carried out</p>
+    <div class="weekday-row">
+      ${WEEKDAY_ABBR.map((w,i) => `<button class="wd-btn ${activeDays.includes(i)?"active":""}" data-goal-day="${catKey}:${i}">${w}</button>`).join("")}
+    </div>`;
+
+  if (g.amount) {
+    if (!todayInfo.activeToday) {
+      html += `<div class="pace-card"><p class="pace-sub" style="margin:0;">Not a practice day for this goal today</p></div>`;
+    } else if (todayInfo.poolTotal === 0) {
+      html += `<div class="pace-card"><p class="pace-sub" style="margin:0;">Select pages, Juz, or Surahs below to see today's pages</p></div>`;
+    } else if (todayInfo.poolRemaining === 0) {
+      html += `<div class="pace-card">
+        ${ICON.book}
+        <p class="pace-sub" style="margin-top:8px;">All selected pages completed 🎉</p>
+      </div>
+      <button class="btn-bulk" data-goal-clear-progress="${catKey}" style="width:100%; margin-bottom:10px;">Clear progress and start again</button>`;
+    } else {
+      const doneToday = g.completedDate === toISO(effectiveToday());
+      html += `<div class="pace-card">
+        <p class="pace-num">${todayInfo.pages.length}</p>
+        <p class="pace-unit">pages today</p>
+        <p class="pace-sub">${formatPageRanges(todayInfo.pages) || "—"} · ${todayInfo.poolRemaining} of ${todayInfo.poolTotal} left</p>
+      </div>`;
+      if (ui.confirmingGoal === catKey) {
+        html += `<div class="panel" style="border-color:var(--brick); margin-top:0;">
+          <p class="detail-sub" style="margin:0 0 10px; color:var(--brick);">Already marked complete today — mark again and advance to the next pages?</p>
+          <div class="bulk-row">
+            <button class="btn-bulk" data-goal-confirm-yes="${catKey}" style="flex:1;">Yes, mark again</button>
+            <button class="btn-outline" data-goal-confirm-no="${catKey}" style="flex:1; margin-bottom:0;">Cancel</button>
+          </div>
+        </div>`;
+      } else {
+        html += `<button class="btn-mark ${doneToday?"completed-today":""}" data-goal-advance="${catKey}" style="width:100%; justify-content:center; margin-bottom:10px;">${doneToday ? ICON.check + " Completed for today" : ICON.check + " Mark today done"}</button>`;
+      }
+    }
+  }
+
+  html += `<p class="section-label" style="margin-top:14px;">Choose from</p>
+    <div class="weekday-row">
+      <button class="wd-btn ${g.unit==="page"?"active":""}" data-goal-unit="${catKey}:page">Pages</button>
+      <button class="wd-btn ${g.unit==="juz"?"active":""}" data-goal-unit="${catKey}:juz">Juz</button>
+      <button class="wd-btn ${g.unit==="surah"?"active":""}" data-goal-unit="${catKey}:surah">Surahs</button>
+    </div>`;
+
+  html += `<button class="grid-toggle" data-goal-page-grid-toggle="${catKey}" style="margin-top:10px; margin-bottom:0;">
+      ${goalSelectionSummary(g)} ${ui.goalPageGridOpen[catKey] ? ICON.chevUp : ICON.chevDown}
+    </button>`;
+  if (ui.goalPageGridOpen[catKey]) {
+    html += `<div class="panel grid-panel" style="margin-top:8px; margin-bottom:0;" id="goalPicker_${catKey}">
+      <div class="chips">`;
+    if (g.unit === "juz") {
+      html += Array.from({length:30}, (_,i) => i+1)
+        .map(j => `<button class="chip chip-auto ${(g.juz||[]).includes(j)?"read":""}" data-goal-togglejuz="${catKey}:${j}">Juz ${j}</button>`).join("");
+    } else if (g.unit === "surah") {
+      html += SURAH_NAMES.map((name, idx) => {
+        const num = idx + 1;
+        return `<button class="chip chip-auto ${(g.surahs||[]).includes(num)?"read":""}" data-goal-togglesurah="${catKey}:${num}">${num}. ${name}</button>`;
+      }).join("");
+    } else {
+      html += Array.from({length:604}, (_,i) => i+1)
+        .map(p => `<button class="chip ${(g.pages||[]).includes(p)?"read":""}" data-goal-togglepage="${catKey}:${p}">${p}</button>`).join("");
+    }
+    html += `</div>
+    </div>`;
+  }
+
+  html += `<button class="btn-danger" data-goal-reset="${catKey}">${ICON.rotate} Reset this goal</button>`;
+  html += `</div>`;
+  return html;
+}
+
+function renderGoals() {
+  const root = document.getElementById("root");
+  const prevWindowScroll = window.scrollY;
+  const prevPickerScrolls = {};
+  GOAL_CATEGORY_KEYS.forEach(k => {
+    const el = document.getElementById(`goalPicker_${k}`);
+    if (el) prevPickerScrolls[k] = el.scrollTop;
+  });
+
+  let html = renderHeaderAndTabs();
+  GOAL_CATEGORY_KEYS.forEach(k => { html += renderGoalCard(k, GOAL_CATEGORY_LABELS[k]); });
+
+  root.innerHTML = html;
+  attachSharedHandlers();
+  attachGoalsHandlers();
+  window.scrollTo(0, prevWindowScroll);
+  GOAL_CATEGORY_KEYS.forEach(k => {
+    const el = document.getElementById(`goalPicker_${k}`);
+    if (el && prevPickerScrolls[k] != null) el.scrollTop = prevPickerScrolls[k];
+  });
+}
+
+function attachGoalsHandlers() {
+  const byId = id => document.getElementById(id);
+
+  // Keeps the clicked element pinned at the same screen position after a
+  // re-render, even if content above it grows/shrinks — so the page never
+  // jumps while picking pages/Juz/Surahs.
+  function anchoredClick(el, attrName, action) {
+    const attrVal = el.getAttribute(attrName);
+    el.onclick = () => {
+      const before = el.getBoundingClientRect().top;
+      action();
+      const after = document.querySelector(`[${attrName}="${CSS.escape(attrVal)}"]`);
+      if (after) window.scrollBy(0, after.getBoundingClientRect().top - before);
+    };
+  }
+
+  document.querySelectorAll("[data-goal-card-toggle]").forEach(el => {
+    anchoredClick(el, "data-goal-card-toggle", () => {
+      const catKey = el.dataset.goalCardToggle;
+      ui.goalCardCollapsed[catKey] = !ui.goalCardCollapsed[catKey];
+      render();
+    });
+  });
+  document.querySelectorAll("[data-goal-timeline]").forEach(el => {
+    anchoredClick(el, "data-goal-timeline", () => {
+      const [catKey, t] = el.dataset.goalTimeline.split(":");
+      setGoalTimeline(catKey, t);
+    });
+  });
+  document.querySelectorAll("[data-goal-unit]").forEach(el => {
+    anchoredClick(el, "data-goal-unit", () => {
+      const [catKey, unit] = el.dataset.goalUnit.split(":");
+      setGoalUnit(catKey, unit);
+    });
+  });
+  document.querySelectorAll("[data-goal-day]").forEach(el => {
+    anchoredClick(el, "data-goal-day", () => {
+      const [catKey, day] = el.dataset.goalDay.split(":");
+      toggleGoalDay(catKey, parseInt(day, 10));
+    });
+  });
+  document.querySelectorAll("[data-goal-save-amount]").forEach(el => {
+    el.onclick = () => {
+      const catKey = el.dataset.goalSaveAmount;
+      const amountVal = byId(`goalAmount_${catKey}`).value;
+      const amount = amountVal.trim() === "" ? null : parseFloat(amountVal);
+      updateGoal(catKey, { amount: Number.isNaN(amount) ? null : amount });
+    };
+  });
+  document.querySelectorAll("[data-goal-page-grid-toggle]").forEach(el => {
+    anchoredClick(el, "data-goal-page-grid-toggle", () => {
+      const catKey = el.dataset.goalPageGridToggle;
+      ui.goalPageGridOpen[catKey] = !ui.goalPageGridOpen[catKey];
+      render();
+    });
+  });
+  document.querySelectorAll("[data-goal-togglepage]").forEach(el => {
+    anchoredClick(el, "data-goal-togglepage", () => {
+      const [catKey, page] = el.dataset.goalTogglepage.split(":");
+      toggleGoalPageSel(catKey, parseInt(page, 10));
+    });
+  });
+  document.querySelectorAll("[data-goal-togglejuz]").forEach(el => {
+    anchoredClick(el, "data-goal-togglejuz", () => {
+      const [catKey, j] = el.dataset.goalTogglejuz.split(":");
+      toggleGoalJuzSel(catKey, parseInt(j, 10));
+    });
+  });
+  document.querySelectorAll("[data-goal-togglesurah]").forEach(el => {
+    anchoredClick(el, "data-goal-togglesurah", () => {
+      const [catKey, s] = el.dataset.goalTogglesurah.split(":");
+      toggleGoalSurahSel(catKey, parseInt(s, 10));
+    });
+  });
+  document.querySelectorAll("[data-goal-advance]").forEach(el => {
+    el.onclick = () => requestMarkComplete(el.dataset.goalAdvance);
+  });
+  document.querySelectorAll("[data-goal-confirm-yes]").forEach(el => {
+    el.onclick = () => confirmMarkComplete(el.dataset.goalConfirmYes);
+  });
+  document.querySelectorAll("[data-goal-confirm-no]").forEach(el => {
+    el.onclick = cancelMarkComplete;
+  });
+  document.querySelectorAll("[data-goal-clear-progress]").forEach(el => {
+    el.onclick = () => clearGoalProgress(el.dataset.goalClearProgress);
+  });
+  document.querySelectorAll("[data-goal-reset]").forEach(el => {
+    el.onclick = () => resetGoal(el.dataset.goalReset);
+  });
+}
+
+// ---------- Today rendering (aggregates all Goals into today's page plan) ----------
+function renderToday() {
+  const root = document.getElementById("root");
+  const prevWindowScroll = window.scrollY;
+  const today = effectiveToday();
+
+  let html = renderHeaderAndTabs();
+  html += `<div class="panel">
+    <p class="detail-title" style="margin:0;">${fmtShort(today)}</p>
+    <p class="detail-sub" style="margin-top:2px;">Today's plan, drawn from your Goals</p>
+  </div>`;
+
+  let anySet = false;
+  GOAL_CATEGORY_KEYS.forEach(key => {
+    const label = GOAL_CATEGORY_LABELS[key];
+    const g = state.goals[key];
+    if (!g.amount) return;
+    anySet = true;
+    const todayInfo = goalTodayPages(g);
+    html += `<div class="panel">
+      <p class="detail-title" style="margin:0;">${label}</p>`;
+    if (!todayInfo.activeToday) {
+      html += `<p class="detail-sub" style="margin-top:6px;">Not a practice day for this goal today.</p>`;
+    } else if (todayInfo.poolTotal === 0) {
+      html += `<p class="detail-sub" style="margin-top:6px;">No pages/Juz/Surahs selected yet for this goal.</p>`;
+    } else if (todayInfo.poolRemaining === 0) {
+      html += `<p class="detail-sub" style="margin-top:6px;">All selected pages completed 🎉</p>`;
+    } else {
+      const rangeStr = formatPageRanges(todayInfo.pages);
+      const doneToday = g.completedDate === toISO(effectiveToday());
+      html += `<div class="pace-card" style="margin:10px 0 0;">
+        <p class="pace-num" style="font-size:24px;">${rangeStr || "—"}</p>
+        <p class="pace-unit">page${todayInfo.pages.length===1?"":"s"} today</p>
+      </div>
+      <p class="detail-sub" style="margin-top:8px;">${todayInfo.poolRemaining} of ${todayInfo.poolTotal} left · ${g.amount} pages per ${TIMELINE_LABELS[g.timeline].toLowerCase()}</p>`;
+      if (ui.confirmingGoal === key) {
+        html += `<div class="panel" style="border-color:var(--brick); margin-top:10px; margin-bottom:0;">
+          <p class="detail-sub" style="margin:0 0 10px; color:var(--brick);">Already marked complete today — mark again and advance to the next pages?</p>
+          <div class="bulk-row">
+            <button class="btn-bulk" data-goal-confirm-yes="${key}" style="flex:1;">Yes, mark again</button>
+            <button class="btn-outline" data-goal-confirm-no="${key}" style="flex:1; margin-bottom:0;">Cancel</button>
+          </div>
+        </div>`;
+      } else {
+        html += `<button class="btn-mark ${doneToday?"completed-today":""}" data-today-complete="${key}" style="width:100%; justify-content:center; margin-top:10px;">${doneToday ? ICON.check + " Completed for today" : ICON.check + " Mark complete"}</button>`;
+      }
+    }
+    html += `</div>`;
+  });
+
+  if (!anySet) {
+    html += `<div class="panel"><p class="detail-sub" style="margin:0;">Set a target in the Goals tab and it will show up here with today's exact pages.</p></div>`;
+  }
+
+  root.innerHTML = html;
+  attachSharedHandlers();
+  document.querySelectorAll("[data-today-complete]").forEach(el => {
+    el.onclick = () => requestMarkComplete(el.dataset.todayComplete);
+  });
+  document.querySelectorAll("[data-goal-confirm-yes]").forEach(el => {
+    el.onclick = () => confirmMarkComplete(el.dataset.goalConfirmYes);
+  });
+  document.querySelectorAll("[data-goal-confirm-no]").forEach(el => {
+    el.onclick = cancelMarkComplete;
+  });
+  window.scrollTo(0, prevWindowScroll);
+}
+
+
+function renderProgress() {
+  const root = document.getElementById("root");
+  const prevWindowScroll = window.scrollY;
+  const juzData = state.progress.juz || {};
+
+  let html = renderHeaderAndTabs();
+
+  html += `<div class="panel">
+    <p class="section-label" style="margin-bottom:10px;">Legend</p>
+    <div class="legend-row">
+      <span class="legend-chip" style="background:#C9C2AC; color:#123B36;">No input</span>
+      <span class="legend-chip" style="background:#4C7A54; color:#F5EFE1;">0–5 · Very good</span>
+      <span class="legend-chip" style="background:#C9A227; color:#123B36;">6–10 · Okay</span>
+      <span class="legend-chip" style="background:#C97A3D; color:#F5EFE1;">11–15 · Average</span>
+      <span class="legend-chip" style="background:#8C3B34; color:#F5EFE1;">16+ · Not good</span>
+    </div>
+  </div>`;
+
+  html += `<p class="section-label">Juz (tap to enter mistakes)</p>
+  <div class="juz-grid">
+    ${Array.from({length:30}, (_,i) => i+1).map(j => {
+      const m = juzData[j] != null ? juzData[j] : null;
+      const c = progressColor(m);
+      const editing = ui.progressEditingJuz === j;
+      return `<div class="juz-cell ${editing?"editing":""}" style="background:${c.bg}; color:${c.text};" data-progress-juz="${j}">
+        <p class="jn">${j}</p>
+        <p class="jm">${m != null ? m : "—"}</p>
+      </div>`;
+    }).join("")}
+  </div>`;
+
+  if (ui.progressEditingJuz != null) {
+    const j = ui.progressEditingJuz;
+    const current = juzData[j];
+    const c = progressColor(current != null ? current : null);
+    html += `<div class="panel">
+      <div class="row-between" style="margin-bottom:2px;">
+        <p class="detail-title" style="margin:0;">Juz ${j}</p>
+        <span class="legend-chip" style="background:${c.bg}; color:${c.text};">${c.label}</span>
+      </div>
+      <div class="bulk-row" style="margin-top:10px;">
+        <div class="field" style="flex:1;"><label>Mistakes during review</label><input type="number" id="progressMistakesInput" min="0" value="${current!=null?current:""}"></div>
+        <button class="btn-bulk" id="progressSaveBtn">Save</button>
+      </div>
+      ${current != null ? `<button class="btn-danger" id="progressClearBtn">Clear input</button>` : ""}
+    </div>`;
+  }
+
+  root.innerHTML = html;
+  attachSharedHandlers();
+  attachProgressHandlers();
+  window.scrollTo(0, prevWindowScroll);
+}
+
+function attachProgressHandlers() {
+  const byId = id => document.getElementById(id);
+  document.querySelectorAll("[data-progress-juz]").forEach(el => {
+    el.onclick = () => selectProgressJuz(parseInt(el.dataset.progressJuz, 10));
+  });
+  const saveBtn = byId("progressSaveBtn");
+  if (saveBtn) saveBtn.onclick = () => {
+    const val = parseInt(byId("progressMistakesInput").value, 10);
+    if (!isNaN(val) && val >= 0) setJuzMistakes(ui.progressEditingJuz, val);
+  };
+  const clearBtn = byId("progressClearBtn");
+  if (clearBtn) clearBtn.onclick = () => clearJuzMistakes(ui.progressEditingJuz);
+}
+
+// ---------- Cycle-tab (Reading / Hifdh) rendering ----------
+function renderCycleTab() {
+  const root = document.getElementById("root");
+  const prevWindowScroll = window.scrollY;
+  const prevGridEl = document.getElementById("allPagesGrid");
+  const prevGridScroll = prevGridEl ? prevGridEl.scrollTop : null;
+
+  const t = getTrack();
+  const unread = unreadPages(t);
+  const totalTracked = trackedPages(t).length;
+  const readCount = totalTracked - unread.length;
+  const pct = totalTracked > 0 ? Math.round((readCount / totalTracked) * 100) : 0;
+  const isComplete = unread.length === 0;
+  const chunks = t.schedule || new Array(t.cycleDays).fill([]);
+  const daysElapsed = currentDaysElapsed(t);
+  const dayDates = Array.from({ length: t.cycleDays }, (_, i) => addDays(fromISO(t.cycleStartDate), i));
+  const todayIdx = dayDates.findIndex(d => toISO(d) === toISO(effectiveToday()));
+  const readSet = new Set(t.readPages);
+  const selectedDay = Math.min(t.selectedDay ?? 0, t.cycleDays - 1);
+
+  let html = renderHeaderAndTabs();
+
+  if (ui.settingsOpen) {
+    html += `<div class="panel">
+      <div class="grid2">
+        <div class="field"><label>Start page</label><input type="number" id="rangeStartInput" value="${t.rangeStart}"></div>
+        <div class="field"><label>End page</label><input type="number" id="rangeEndInput" value="${t.rangeEnd}"></div>
+        <div class="field"><label>Cycle length (days)</label><input type="number" id="cycleDaysInput" value="${t.cycleDays}"></div>
+        <div class="field"><label>Cycle starts on</label>
+          <select id="startWeekdaySelect">
+            ${WEEKDAYS.map((w,i) => `<option value="${i}" ${i===t.startWeekday?"selected":""}>${w}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" id="applySettingsBtn">Save & rebuild cycle</button>
+    </div>`;
+  }
+
+  html += `<div class="progress-card">
+    <div class="progress-fill" style="width:${pct}%"></div>
+    <div class="progress-top">
+      <div>
+        <p class="progress-label">Progress</p>
+        <p class="progress-count">${readCount}<span>/${totalTracked} pages</span></p>
+      </div>
+      <p class="progress-pct">${pct}%</p>
+    </div>
+    <p class="progress-sub">Cycle started ${fmtShort(fromISO(t.cycleStartDate))} · ${unread.length} pages remaining</p>
+  </div>`;
+
+  if (state.activeTab === "hifdh") {
+    const pending = (t.pendingPages || []).slice().sort((a,b) => a-b);
+    html += `<button class="grid-toggle" id="pendingToggle">Add memorised pages${pending.length ? ` (${pending.length} queued)` : ""} ${ui.pendingOpen ? ICON.chevUp : ICON.chevDown}</button>`;
+    if (ui.pendingOpen) {
+      html += `<div class="panel">
+        <p class="detail-sub" style="margin:0 0 10px;">Queued pages join the review pool when your next cycle starts — they won't change today's list.</p>
+        <div class="bulk-row">
+          <div class="field" style="flex:1;"><label>From</label><input type="number" id="pendingFromInput" placeholder="e.g. 177"></div>
+          <div class="field" style="flex:1;"><label>To</label><input type="number" id="pendingToInput" placeholder="e.g. 185"></div>
+          <button class="btn-bulk" id="queuePendingBtn">Queue</button>
+        </div>
+        ${pending.length ? `
+          <p class="detail-sub" style="margin-top:12px;">Queued for next cycle (${pending.length}) — tap to remove:</p>
+          <div class="chips" style="margin-top:6px;">
+            ${pending.map(p => `<button class="chip" data-remove-pending="${p}">${p} ×</button>`).join("")}
+          </div>
+        ` : ""}
+      </div>`;
+    }
+  }
+
+  if (isComplete) {
+    html += `<div class="complete-card">
+      ${ICON.book}
+      <p>You've read every page in this range</p>
+      <button class="btn-mark" id="resetProgressBtn" style="margin-top:16px;">${ICON.rotate} Start over on this range</button>
+    </div>`;
+  } else {
+    html += `<p class="section-label">This cycle</p>
+    <div class="ribbon">
+      ${chunks.map((chunk, i) => {
+        const done = chunk.length > 0 && chunk.every(p => readSet.has(p));
+        const isPast = i < daysElapsed;
+        const classes = ["day-tab"];
+        if (done) classes.push("done");
+        if (i === selectedDay) classes.push("active");
+        if (i === todayIdx) classes.push("today");
+        if (isPast && !done) classes.push("past");
+        return `<div class="${classes.join(" ")}" data-day="${i}">
+          <p class="num">${i+1}</p>
+          <p class="wd">${dayDates[i].toLocaleDateString(undefined,{weekday:"short"})}</p>
+        </div>`;
+      }).join("")}
+    </div>`;
+
+    const sel = chunks[selectedDay] || [];
+    html += `<div class="detail-card">
+      <div class="detail-top">
+        <div>
+          <p class="detail-title">Day ${selectedDay+1} · ${fmtShort(dayDates[selectedDay])}</p>
+          <p class="detail-sub">${sel.length ? sel.length + " pages total" : "No pages assigned"}</p>
+        </div>
+        ${sel.length ? `<button class="btn-mark" id="markDayBtn">${ICON.check} Mark day read</button>` : ""}
+      </div>
+      <div class="chips">
+        ${sel.map(p => `<button class="chip ${readSet.has(p)?"read":""}" data-page="${p}">${p}</button>`).join("")}
+      </div>
+    </div>`;
+
+    html += `<button class="btn-outline" id="rebuildBtn">${ICON.rotate} Rebuild cycle from today's unread pages</button>`;
+  }
+
+  html += `<div class="panel">
+    <p class="section-label">Mark a range as read</p>
+    <div class="bulk-row">
+      <div class="field" style="flex:1;"><label>From</label><input type="number" id="bulkFromInput" placeholder="${t.rangeStart}"></div>
+      <div class="field" style="flex:1;"><label>To</label><input type="number" id="bulkToInput" placeholder="${t.rangeEnd}"></div>
+      <button class="btn-bulk" id="bulkMarkBtn">Mark read</button>
+    </div>
+  </div>`;
+
+  html += `<button class="grid-toggle" id="gridToggle">All pages in range ${ui.gridOpen ? ICON.chevUp : ICON.chevDown}</button>`;
+  if (ui.gridOpen) {
+    html += `<div class="panel grid-panel" id="allPagesGrid">
+      <div class="chips">
+        ${trackedPages(t).map(p => `<button class="chip ${readSet.has(p)?"read":""}" data-page="${p}">${p}</button>`).join("")}
+      </div>
+    </div>`;
+  }
+
+  root.innerHTML = html;
+  attachSharedHandlers();
+  attachCycleHandlers();
+
+  window.scrollTo(0, prevWindowScroll);
+  if (prevGridScroll !== null) {
+    const gridEl = document.getElementById("allPagesGrid");
+    if (gridEl) gridEl.scrollTop = prevGridScroll;
+  }
+  const activeTab = document.querySelector(".day-tab.active");
+  if (activeTab) activeTab.scrollIntoView({ behavior: "instant", inline: "center", block: "nearest" });
+}
+
+function renderPoq() {
+  const root = document.getElementById("root");
+  const prevWindowScroll = window.scrollY;
+
+  const t = getTrack();
+  const today = effectiveToday();
+  const dates = Array.from({ length: 45 }, (_, i) => addDays(today, i - 14));
+  const selISO = t.selectedDate;
+  const selDateObj = fromISO(selISO);
+  const selWd = selDateObj.getDay();
+  const selListenOn = (t.listenDays || []).includes(selWd);
+  const selReadOn = (t.readDays || []).includes(selWd);
+  const selEntry = poqEntry(t, selISO);
+
+  let html = renderHeaderAndTabs();
+
+  if (ui.settingsOpen) {
+    html += `<div class="panel">
+      <div class="grid2">
+        <div class="field"><label>Start page</label><input type="number" id="rangeStartInput" value="${t.rangeStart}"></div>
+        <div class="field"><label>End page</label><input type="number" id="rangeEndInput" value="${t.rangeEnd}"></div>
+      </div>
+      <p class="section-label" style="margin-top:14px;">Listening days (12 pages)</p>
+      <div class="weekday-row">
+        ${WEEKDAY_ABBR.map((w,i) => `<button class="wd-btn ${(t.listenDays||[]).includes(i)?"active":""}" data-listen-day="${i}">${w}</button>`).join("")}
+      </div>
+      <p class="section-label" style="margin-top:14px;">Reading days (6 pages)</p>
+      <div class="weekday-row">
+        ${WEEKDAY_ABBR.map((w,i) => `<button class="wd-btn ${(t.readDays||[]).includes(i)?"active":""}" data-read-day="${i}">${w}</button>`).join("")}
+      </div>
+      <p class="section-label" style="margin-top:14px;">Which half to read</p>
+      <div class="weekday-row">
+        <button class="wd-btn ${((t.readHalf||"first")==="first")?"active":""}" data-read-half="first" style="flex:1;">First 6 of 12</button>
+        <button class="wd-btn ${(t.readHalf==="second")?"active":""}" data-read-half="second" style="flex:1;">Second 6 of 12</button>
+      </div>
+      <button class="btn-primary" id="applyPoqRangeBtn">Save page range</button>
+      <button class="btn-danger" id="resetPoqBtn">${ICON.rotate} Reset all POQ progress</button>
+    </div>`;
+  }
+
+  html += `<div class="row-between">
+    <p class="section-label" style="margin:0;">Schedule</p>
+    <button class="link-btn" id="poqTodayBtn">Jump to today</button>
+  </div>
+  <div class="ribbon">
+    ${dates.map(d => {
+      const dISO = toISO(d);
+      const wd = d.getDay();
+      const listenOn = (t.listenDays || []).includes(wd);
+      const readOn = (t.readDays || []).includes(wd);
+      const inactiveDay = !listenOn && !readOn;
+      const done = poqDayComplete(t, dISO);
+      const classes = ["day-tab"];
+      if (done) classes.push("done");
+      if (dISO === selISO) classes.push("active");
+      if (toISO(d) === toISO(today)) classes.push("today");
+      if (d < today && !done) classes.push("past");
+      if (inactiveDay) classes.push("inactive-day");
+      return `<div class="${classes.join(" ")}" data-poq-date="${dISO}">
+        <p class="num">${d.getDate()}</p>
+        <p class="wd">${d.toLocaleDateString(undefined,{weekday:"short"})}</p>
+      </div>`;
+    }).join("")}
+  </div>`;
+
+  html += `<div class="detail-card">
+    <p class="detail-title">${fmtShort(selDateObj)}</p>`;
+
+  if (!selListenOn && !selReadOn) {
+    html += `<p class="detail-sub" style="margin-top:6px;">No POQ session scheduled for this day.</p>`;
+  } else {
+    html += `<div class="bulk-row" style="margin-top:12px;">
+      <div class="field" style="flex:1;"><label>Start page</label><input type="number" id="poqStartInput" value="${selEntry.startPage ?? ""}" placeholder="e.g. ${t.rangeStart}"></div>
+      <button class="btn-bulk" id="poqSetStartBtn">Set</button>
+    </div>`;
+
+    if (selEntry.startPage != null) {
+      if (selListenOn) {
+        const listenPages = [];
+        for (let p = selEntry.startPage; p <= Math.min(selEntry.startPage + 11, t.rangeEnd); p++) listenPages.push(p);
+        const listenSet = new Set(selEntry.listened || []);
+        html += `<p class="section-label" style="margin-top:16px;">Listening · ${listenPages.length} pages</p>
+        <div class="chips">
+          ${listenPages.map(p => `<button class="chip ${listenSet.has(p)?"read":""}" data-poq-toggle="listened:${p}">${p}</button>`).join("")}
+        </div>`;
+      }
+      if (selReadOn) {
+        const readPages = [];
+        if ((t.readHalf || "first") === "second") {
+          for (let p = selEntry.startPage + 6; p <= Math.min(selEntry.startPage + 11, t.rangeEnd); p++) readPages.push(p);
+        } else {
+          for (let p = selEntry.startPage; p <= Math.min(selEntry.startPage + 5, t.rangeEnd); p++) readPages.push(p);
+        }
+        const readSet = new Set(selEntry.read || []);
+        html += `<p class="section-label" style="margin-top:16px;">Reading · ${readPages.length} pages</p>
+        <div class="chips">
+          ${readPages.map(p => `<button class="chip ${readSet.has(p)?"read":""}" data-poq-toggle="read:${p}">${p}</button>`).join("")}
+        </div>`;
+      }
+    } else {
+      html += `<p class="detail-sub" style="margin-top:10px;">Set a start page to see today's pages.</p>`;
+    }
+  }
+  html += `</div>`;
+
+  root.innerHTML = html;
+  attachSharedHandlers();
+  attachPoqHandlers();
+
+  window.scrollTo(0, prevWindowScroll);
+  const activeTab = document.querySelector(".day-tab.active");
+  if (activeTab) activeTab.scrollIntoView({ behavior: "instant", inline: "center", block: "nearest" });
+}
+
+function attachSharedHandlers() {
+  const byId = id => document.getElementById(id);
+  document.querySelectorAll(".tab-btn").forEach(el => {
+    el.onclick = () => switchTab(el.dataset.tab);
+  });
+  const st = byId("settingsToggle");
+  if (st) st.onclick = () => { ui.settingsOpen = !ui.settingsOpen; render(); };
+}
+
+function attachCycleHandlers() {
+  const byId = id => document.getElementById(id);
+
+  const apply = byId("applySettingsBtn");
+  if (apply) apply.onclick = applySettings;
+
+  const reset = byId("resetProgressBtn");
+  if (reset) reset.onclick = resetProgress;
+
+  const rebuild = byId("rebuildBtn");
+  if (rebuild) rebuild.onclick = forceNewCycle;
+
+  const markDay = byId("markDayBtn");
+  if (markDay) markDay.onclick = () => {
+    const t = getTrack();
+    const chunks = t.schedule || [];
+    const selectedDay = Math.min(t.selectedDay ?? 0, t.cycleDays - 1);
+    markDayRead(chunks[selectedDay] || []);
+  };
+
+  const bulkBtn = byId("bulkMarkBtn");
+  if (bulkBtn) bulkBtn.onclick = () => {
+    const a = parseInt(byId("bulkFromInput").value, 10);
+    const b = parseInt(byId("bulkToInput").value, 10);
+    if (!isNaN(a) && !isNaN(b)) markRangeRead(a, b);
+  };
+
+  const queueBtn = byId("queuePendingBtn");
+  if (queueBtn) queueBtn.onclick = () => {
+    const a = parseInt(byId("pendingFromInput").value, 10);
+    const b = parseInt(byId("pendingToInput").value, 10);
+    if (!isNaN(a) && !isNaN(b)) queuePendingPages(a, b);
+  };
+  document.querySelectorAll("[data-remove-pending]").forEach(el => {
+    el.onclick = () => removePending(parseInt(el.dataset.removePending, 10));
+  });
+
+  const pendingToggle = byId("pendingToggle");
+  if (pendingToggle) pendingToggle.onclick = () => { ui.pendingOpen = !ui.pendingOpen; render(); };
+
+  const gridToggle = byId("gridToggle");
+  if (gridToggle) gridToggle.onclick = () => { ui.gridOpen = !ui.gridOpen; render(); };
+
+  document.querySelectorAll(".day-tab[data-day]").forEach(el => {
+    el.onclick = () => selectDay(parseInt(el.dataset.day, 10));
+  });
+
+  document.querySelectorAll(".chip[data-page]").forEach(el => {
+    el.onclick = () => togglePage(parseInt(el.dataset.page, 10));
+  });
+}
+
+function attachPoqHandlers() {
+  const byId = id => document.getElementById(id);
+
+  const applyRange = byId("applyPoqRangeBtn");
+  if (applyRange) applyRange.onclick = applyPoqRange;
+
+  document.querySelectorAll("[data-listen-day]").forEach(el => {
+    el.onclick = () => togglePoqWeekday("listenDays", parseInt(el.dataset.listenDay, 10));
+  });
+  document.querySelectorAll("[data-read-day]").forEach(el => {
+    el.onclick = () => togglePoqWeekday("readDays", parseInt(el.dataset.readDay, 10));
+  });
+  document.querySelectorAll("[data-read-half]").forEach(el => {
+    el.onclick = () => setPoqReadHalf(el.dataset.readHalf);
+  });
+
+  const resetBtn = byId("resetPoqBtn");
+  if (resetBtn) resetBtn.onclick = resetPoq;
+
+  const todayBtn = byId("poqTodayBtn");
+  if (todayBtn) todayBtn.onclick = () => selectPoqDate(toISO(effectiveToday()));
+
+  document.querySelectorAll(".day-tab[data-poq-date]").forEach(el => {
+    el.onclick = () => selectPoqDate(el.dataset.poqDate);
+  });
+
+  const setStartBtn = byId("poqSetStartBtn");
+  if (setStartBtn) setStartBtn.onclick = () => {
+    const val = parseInt(byId("poqStartInput").value, 10);
+    if (!isNaN(val)) setPoqStartPage(getTrack().selectedDate, val);
+  };
+
+  document.querySelectorAll("[data-poq-toggle]").forEach(el => {
+    el.onclick = () => {
+      const [kind, pageStr] = el.dataset.poqToggle.split(":");
+      togglePoqPage(getTrack().selectedDate, parseInt(pageStr, 10), kind);
+    };
+  });
+}
+
+load();
+</script>
+</body>
+</html>
